@@ -4,6 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let cardsChosen = [];
     let cardsChosenId = [];
     let cardsWon = [];
+    let playerId = '';
+    let moves = 0;
+
+    function generatePlayerId() {
+       return 'player-' + Date.now(); // Simple unique ID
+}
+
 
     const cardArray = [
         { name: 'card1', img: 'images/tree.png' },
@@ -48,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cardsChosenId.push(cardId);
             this.setAttribute('src', cardArray[cardId].img);
             if (cardsChosen.length === 2) {
+                moves++
                 setTimeout(checkForMatch, 1000);
             }
         }
@@ -71,11 +79,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cardsChosen = [];
         cardsChosenId = [];
+        
 
         if (cardsWon.length === cardArray.length / 2) {
-            alert('Congratulations! You found them all!');
+            alert(`Congratulations! You found them all!\nPlayer ID: ${playerId}\nMoves Taken: ${moves}`);
+            savePlayerData(playerId, moves); // ✅ Clean and reusable
         }
+        
+        
     }
-
-    startButton.addEventListener('click', createBoard);
+    
+    function savePlayerData(playerId, moves) {
+        fetch('http://localhost:3000/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerId, moves })
+        })
+        .then(res => res.json())
+        .then(data => console.log(data))
+        .catch(err => console.error('Error:', err));
+    }
+    
+    startButton.addEventListener('click', () => {
+        playerId = generatePlayerId();
+        moves = 0;
+        createBoard();
+    });
+    
 });
